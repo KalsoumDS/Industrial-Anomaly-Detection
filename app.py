@@ -19,7 +19,6 @@ from model.autoencoder import AnomalyDetector
 # ── CONFIG ──────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Industrial Anomaly Detection",
-    page_icon="🏭",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -70,13 +69,13 @@ def train_model_in_app(n_files, seq_len, epochs, hidden, latent):
     """Entraîne le modèle depuis l'interface Streamlit avec données SKAB réelles."""
     os.makedirs(MODEL_DIR, exist_ok=True)
 
-    st.info("📥 Téléchargement du dataset SKAB (données réelles de pompe industrielle)...")
+    st.info("Téléchargement du dataset SKAB (données réelles de pompe industrielle)...")
     df = load_skab_data(
         cache_path=os.path.join(MODEL_DIR, 'skab_data.csv'),
         n_files=n_files
     )
     df_normal = get_normal_data(df)
-    st.success(f"✅ {len(df)} échantillons SKAB chargés — {df['is_anomaly'].sum()} anomalies réelles")
+    st.success(f"{len(df)} échantillons SKAB chargés — {df['is_anomaly'].sum()} anomalies réelles")
 
     from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()
@@ -102,7 +101,7 @@ def train_model_in_app(n_files, seq_len, epochs, hidden, latent):
     detector.save(os.path.join(MODEL_DIR, 'autoencoder.pt'))
 
     progress_bar.progress(1.0)
-    loss_placeholder.markdown(f"✅ **Entraînement terminé !** Loss finale: `{losses[-1]:.6f}`")
+    loss_placeholder.markdown(f"**Entraînement terminé !** Loss finale: `{losses[-1]:.6f}`")
 
     st.cache_resource.clear()
     st.cache_data.clear()
@@ -248,7 +247,7 @@ def main():
     # Header
     st.markdown("""
     <h1 style='font-size:2.2rem;font-weight:900;margin-bottom:0'>
-        🏭 Industrial Anomaly Detection
+        Industrial Anomaly Detection
     </h1>
     <p style='color:#888;font-size:1rem;margin-top:4px'>
         Détection d'anomalies sur capteurs industriels — Autoencoder LSTM PyTorch
@@ -258,19 +257,19 @@ def main():
 
     # ── ONGLETS PRINCIPAUX (nouvel ordre !) ──
     tab_welcome, tab_train, tab_detect, tab_overview, tab_stats, tab_model = st.tabs([
-        "👋 Bienvenue", "🔧 Entraîner le modèle", "🔍 Détecter des anomalies", 
-        "📊 Vue d'ensemble", "📈 Statistiques", "🧠 Comment ça marche ?"
+        "Bienvenue", "Entraîner le modèle", "Détecter des anomalies", 
+        "Vue d'ensemble", "Statistiques", "Comment ça marche ?"
     ])
 
     # ── SIDEBAR ──
     with st.sidebar:
-        st.markdown("## ⚙️ Configuration")
+        st.markdown("## Configuration")
 
-        st.markdown("### 📊 Données SKAB")
+        st.markdown("### Données SKAB")
         n_files = st.slider("Nombre de fichiers SKAB", 1, 9, 5,
                             help="Chaque fichier = ~1000 échantillons réels de capteurs industriels")
 
-        st.markdown("### 🧠 Modèle")
+        st.markdown("### Modèle")
         seq_len   = st.selectbox("Longueur de séquence", [20, 30, 50], index=1)
         epochs    = st.slider("Epochs d'entraînement", 10, 100, 50, 10)
         hidden    = st.selectbox("Hidden size", [32, 64, 128], index=1)
@@ -278,11 +277,11 @@ def main():
         percentile = st.slider("Percentile seuil (%)", 80, 99, 95, 1,
                                 help="Plus élevé = moins d'alertes (plus strict)")
 
-        st.markdown("### 🚀 Entraînement")
-        train_btn = st.button("🔄 (Ré)entraîner le modèle", type="primary", use_container_width=True)
+        st.markdown("### Entraînement")
+        train_btn = st.button("(Ré)entraîner le modèle", type="primary", use_container_width=True)
 
         st.divider()
-        st.markdown("### 📡 Capteur affiché")
+        st.markdown("### Capteur affiché")
         selected_feature = st.selectbox(
             "Sélectionner un capteur",
             FEATURES,
@@ -296,28 +295,28 @@ def main():
         Skoltech Anomaly Benchmark — données réelles d'une pompe hydraulique industrielle.
         8 capteurs, anomalies labelisées.
         
-        📄 [Paper SKAB](https://github.com/waico/SKAB) · [GitHub](https://github.com/KalsoumDS)
+        [Paper SKAB](https://github.com/waico/SKAB) · [GitHub](https://github.com/KalsoumDS)
         """)
 
     # ── ONGLET 1: BIENVENUE ──
     with tab_welcome:
         st.markdown("""
-        ## 🎯 Bienvenue !
+        ## Bienvenue
         
-        Cette application permet de **détecter automatiquement les anomalies** sur une machine industrielle (pompe hydraulique) en analysant les données de ses capteurs.
+        Cette application permet de détecter automatiquement les anomalies sur une machine industrielle (pompe hydraulique) en analysant les données de ses capteurs.
         
-        ### 🤔 Pourquoi ça importe ?
+        ### Pourquoi ça importe ?
         En industrie, détecter les défauts tôt permet :
         - D'éviter des pannes coûteuses
         - De planifier la maintenance (maintenance prédictive)
         - D'assurer la sécurité des opérateurs
         
-        ### 📋 Étapes pour utiliser l'app :
-        1. **Entraîner le modèle** (onglet "🔧 Entraîner le modèle")
-        2. **Détecter des anomalies** (onglet "🔍 Détecter des anomalies")
-        3. Explorer les résultats !
+        ### Étapes pour utiliser l'app :
+        1. Entraîner le modèle (onglet "Entraîner le modèle")
+        2. Détecter des anomalies (onglet "Détecter des anomalies")
+        3. Explorer les résultats
         
-        ### 📊 Les capteurs utilisés :
+        ### Les capteurs utilisés :
         """)
         for feat, label in FEATURE_LABELS.items():
             st.markdown(f"- **{label}** ({feat})")
@@ -325,20 +324,20 @@ def main():
     # ── ONGLET 2: ENTRAÎNEMENT ──
     with tab_train:
         st.markdown("""
-        ## 🔧 Entraîner le modèle
+        ## Entraîner le modèle
         
-        Le modèle est un **Autoencoder LSTM** : il apprend à reconstruire les données **normales** de la machine.
+        Le modèle est un Autoencoder LSTM : il apprend à reconstruire les données normales de la machine.
         """)
         
         if train_btn:
-            st.markdown("### 🔧 Entraînement en cours...")
+            st.markdown("### Entraînement en cours...")
             losses = train_model_in_app(n_files, seq_len, epochs, hidden, latent)
             st.plotly_chart(plot_loss_curve(losses), use_container_width=True)
-            st.success("✅ Modèle entraîné et sauvegardé !")
+            st.success("Modèle entraîné et sauvegardé !")
             time.sleep(1)
             st.rerun()
         else:
-            st.info("👆 Cliquez sur le bouton **'(Ré)entraîner le modèle'** dans la barre latérale pour commencer !")
+            st.info("Cliquez sur le bouton '(Ré)entraîner le modèle' dans la barre latérale pour commencer.")
 
     # ── CHARGEMENT MODÈLE ET DONNÉES (pour les onglets suivants) ──
     detector, scaler, needs_training = load_or_train_model()
@@ -346,7 +345,7 @@ def main():
     if needs_training:
         for tab in [tab_detect, tab_overview, tab_stats, tab_model]:
             with tab:
-                st.info("⚠️ Aucun modèle trouvé. Veuillez d'abord l'entraîner dans l'onglet '🔧 Entraîner le modèle'.")
+                st.info("Aucun modèle trouvé. Veuillez d'abord l'entraîner dans l'onglet 'Entraîner le modèle'.")
         st.stop()
 
     # Charger les données
@@ -361,7 +360,7 @@ def main():
     anomaly_rate = float(is_anomaly.mean() * 100)
     max_error = float(errors.max())
     mean_error = float(errors.mean())
-    status = "🔴 CRITIQUE" if anomaly_rate > 8 else ("🟡 ATTENTION" if anomaly_rate > 3 else "🟢 NORMAL")
+    status = "CRITIQUE" if anomaly_rate > 8 else ("ATTENTION" if anomaly_rate > 3 else "NORMAL")
     status_class = "alert-critical" if anomaly_rate > 8 else ("alert-warning" if anomaly_rate > 3 else "alert-normal")
 
     # ── ONGLET 3: DÉTECTION ──
@@ -374,13 +373,13 @@ def main():
         
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("🔴 Anomalies", f"{n_anomalies}", f"{anomaly_rate:.1f}%")
+            st.metric("Anomalies", f"{n_anomalies}", f"{anomaly_rate:.1f}%")
         with col2:
-            st.metric("📉 Erreur moyenne", f"{mean_error:.4f}")
+            st.metric("Erreur moyenne", f"{mean_error:.4f}")
         with col3:
-            st.metric("📈 Erreur max", f"{max_error:.4f}")
+            st.metric("Erreur max", f"{max_error:.4f}")
         with col4:
-            st.metric("📏 Seuil", f"{threshold:.4f}")
+            st.metric("Seuil", f"{threshold:.4f}")
         
         st.divider()
         st.plotly_chart(
@@ -391,7 +390,7 @@ def main():
         seq_len_used = detector.sequence_length
         anom_indices = np.where(is_anomaly)[0]
         if len(anom_indices) > 0:
-            st.markdown(f"#### ⚠️ {len(anom_indices)} anomalies détectées")
+            st.markdown(f"#### {len(anom_indices)} anomalies détectées")
             anom_data = []
             for idx in anom_indices[:20]:
                 real_idx = idx + seq_len_used - 1
@@ -406,16 +405,16 @@ def main():
                     })
             st.dataframe(pd.DataFrame(anom_data), use_container_width=True)
         else:
-            st.success("✅ Aucune anomalie détectée !")
+            st.success("Aucune anomalie détectée.")
 
     # ── ONGLET 4: VUE D'ENSEMBLE ──
     with tab_overview:
-        st.markdown("#### 📊 Vue d'ensemble des 8 capteurs")
+        st.markdown("#### Vue d'ensemble des 8 capteurs")
         st.plotly_chart(plot_all_sensors(df), use_container_width=True)
 
     # ── ONGLET 5: STATISTIQUES ──
     with tab_stats:
-        st.markdown("#### 📈 Distribution des erreurs de reconstruction")
+        st.markdown("#### Distribution des erreurs de reconstruction")
         st.plotly_chart(plot_error_distribution(errors, threshold), use_container_width=True)
         col_a, col_b = st.columns(2)
         with col_a:
@@ -438,7 +437,7 @@ def main():
 
     # ── ONGLET 6: COMMENT ÇA MARCHE ──
     with tab_model:
-        st.markdown("#### 🧠 Comment ça marche ?")
+        st.markdown("#### Comment ça marche ?")
         col_m1, col_m2 = st.columns(2)
         with col_m1:
             st.markdown(f"""
@@ -461,21 +460,21 @@ def main():
             st.markdown("""
             **Principe de fonctionnement :**
             
-            1. **Entraînement** : on donne seulement des données **normales** au modèle
-            2. **Encodage** : LSTM compresse la séquence de capteurs en un petit vecteur latent
-            3. **Décodage** : le modèle essaie de reconstruire la séquence originale
-            4. **Erreur MSE** : on mesure la différence entre la reconstruction et l'original
-            5. **Seuil** : on fixe un seuil (percentile 95 des erreurs sur données normales)
-            6. **Détection** : si l'erreur dépasse le seuil → **ANOMALIE !**
+            1. Entraînement : on donne seulement des données normales au modèle
+            2. Encodage : LSTM compresse la séquence de capteurs en un petit vecteur latent
+            3. Décodage : le modèle essaie de reconstruire la séquence originale
+            4. Erreur MSE : on mesure la différence entre la reconstruction et l'original
+            5. Seuil : on fixe un seuil (percentile 95 des erreurs sur données normales)
+            6. Détection : si l'erreur dépasse le seuil, on détecte une anomalie
             
-            *Le modèle ne voit jamais les anomalies pendant l'entraînement : il apprend seulement ce qui est "normal" !*
+            Le modèle ne voit jamais les anomalies pendant l'entraînement : il apprend seulement ce qui est "normal".
             """)
 
         model_path = os.path.join(MODEL_DIR, 'autoencoder.pt')
         if os.path.exists(model_path):
             with open(model_path, 'rb') as f:
                 st.download_button(
-                    "⬇️ Télécharger le modèle (.pt)",
+                    "Télécharger le modèle (.pt)",
                     f, file_name="autoencoder.pt",
                     mime="application/octet-stream"
                 )

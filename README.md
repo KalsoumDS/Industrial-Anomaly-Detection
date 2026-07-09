@@ -1,4 +1,4 @@
-# 🏭 Industrial Anomaly Detection
+# Industrial Anomaly Detection
 
 > Détection d'anomalies en temps réel sur capteurs industriels — Autoencoder LSTM PyTorch + Dashboard Streamlit
 
@@ -6,23 +6,23 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.2+-red)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-ff4b4b)
 
-## 🎯 Objectif
+## Objectif
 
 Ce projet implémente un système de détection d'anomalies non supervisé sur des séries temporelles industrielles (données de capteurs : température, vibration, pression, courant).
 
-**Principe :** Un Autoencoder LSTM apprend à reconstruire les données **normales**. Toute séquence anormale génère une erreur de reconstruction élevée → **anomalie détectée**.
+Principe : Un Autoencoder LSTM apprend à reconstruire les données normales. Toute séquence anormale génère une erreur de reconstruction élevée, ce qui permet de détecter une anomalie.
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 Capteurs → Fenêtres glissantes → LSTM Encodeur → Vecteur latent
                                                        ↓
-Erreur MSE ← Reconstruction ← LSTM Décodeur ←────────┘
+Erreur MSE ← Reconstruction ← LSTM Décodeur ←──────────┘
      ↓
-  > Seuil ? → ANOMALIE 🔴
+  > Seuil ? → ANOMALIE
 ```
 
-## 📊 Types d'anomalies détectées
+## Types d'anomalies détectées
 
 | Type | Description | Capteur |
 |------|-------------|---------|
@@ -30,13 +30,13 @@ Erreur MSE ← Reconstruction ← LSTM Décodeur ←────────┘
 | Drift | Dérive progressive | Pression, Courant |
 | Drop | Chute soudaine (×0.5) | Température, Pression |
 
-## 🚀 Installation
+## Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 🏃 Utilisation
+## Utilisation
 
 ### 1. Entraîner le modèle
 ```bash
@@ -48,9 +48,9 @@ python train.py
 streamlit run app.py
 ```
 
-Ou directement depuis le dashboard : cliquer sur **"(Ré)entraîner le modèle"**.
+Ou directement depuis le dashboard : cliquer sur "(Ré)entraîner le modèle".
 
-## 📁 Structure
+## Structure du projet
 
 ```
 industrial-anomaly-detection/
@@ -70,22 +70,22 @@ industrial-anomaly-detection/
 └── README.md
 ```
 
-## 🛠️ Stack technique
+## Stack technique
 
-- **PyTorch** — Architecture Autoencoder LSTM
-- **Streamlit** — Dashboard interactif temps réel
-- **Plotly** — Visualisations dynamiques
-- **Scikit-learn** — Normalisation (StandardScaler)
-- **NumPy / Pandas** — Traitement des données
+- PyTorch — Architecture Autoencoder LSTM
+- Streamlit — Dashboard interactif temps réel
+- Plotly — Visualisations dynamiques
+- Scikit-learn — Normalisation (StandardScaler)
+- NumPy / Pandas — Traitement des données
 
-## 📈 Résultats
+## Résultats
 
 - Détection non supervisée (pas de labels nécessaires à l'entraînement)
 - Seuil adaptatif basé sur le percentile des erreurs normales
 - Dashboard temps réel avec alertes visuelles
 - Distribution des erreurs et table des anomalies détectées
 
-## 👩‍💻 Auteur
+## Auteur
 
-**Oumou Kaltoum Sall** — Data Scientist & ML Engineer  
+Oumou Kaltoum Sall — Data Scientist & ML Engineer  
 [GitHub](https://github.com/KalsoumDS) · [Email](mailto:s.sall@mundiapolis.ma)
