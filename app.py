@@ -256,6 +256,12 @@ def main():
     """, unsafe_allow_html=True)
     st.divider()
 
+    # ── ONGLETS PRINCIPAUX (nouvel ordre !) ──
+    tab_welcome, tab_train, tab_detect, tab_overview, tab_stats, tab_model = st.tabs([
+        "👋 Bienvenue", "🔧 Entraîner le modèle", "🔍 Détecter des anomalies", 
+        "📊 Vue d'ensemble", "📈 Statistiques", "🧠 Comment ça marche ?"
+    ])
+
     # ── SIDEBAR ──
     with st.sidebar:
         st.markdown("## ⚙️ Configuration")
@@ -293,71 +299,96 @@ def main():
         📄 [Paper SKAB](https://github.com/waico/SKAB) · [GitHub](https://github.com/KalsoumDS)
         """)
 
-    # ── ENTRAÎNEMENT ──
-    if train_btn:
-        st.markdown("### 🔧 Entraînement en cours...")
-        losses = train_model_in_app(n_files, seq_len, epochs, hidden, latent)
-        st.plotly_chart(plot_loss_curve(losses), use_container_width=True)
-        st.success("✅ Modèle entraîné et sauvegardé ! Rechargement automatique...")
-        time.sleep(1)
-        st.rerun()
+    # ── ONGLET 1: BIENVENUE ──
+    with tab_welcome:
+        st.markdown("""
+        ## 🎯 Bienvenue !
+        
+        Cette application permet de **détecter automatiquement les anomalies** sur une machine industrielle (pompe hydraulique) en analysant les données de ses capteurs.
+        
+        ### 🤔 Pourquoi ça importe ?
+        En industrie, détecter les défauts tôt permet :
+        - D'éviter des pannes coûteuses
+        - De planifier la maintenance (maintenance prédictive)
+        - D'assurer la sécurité des opérateurs
+        
+        ### 📋 Étapes pour utiliser l'app :
+        1. **Entraîner le modèle** (onglet "🔧 Entraîner le modèle")
+        2. **Détecter des anomalies** (onglet "🔍 Détecter des anomalies")
+        3. Explorer les résultats !
+        
+        ### 📊 Les capteurs utilisés :
+        """)
+        for feat, label in FEATURE_LABELS.items():
+            st.markdown(f"- **{label}** ({feat})")
 
-    # ── CHARGEMENT MODÈLE ──
+    # ── ONGLET 2: ENTRAÎNEMENT ──
+    with tab_train:
+        st.markdown("""
+        ## 🔧 Entraîner le modèle
+        
+        Le modèle est un **Autoencoder LSTM** : il apprend à reconstruire les données **normales** de la machine.
+        """)
+        
+        if train_btn:
+            st.markdown("### 🔧 Entraînement en cours...")
+            losses = train_model_in_app(n_files, seq_len, epochs, hidden, latent)
+            st.plotly_chart(plot_loss_curve(losses), use_container_width=True)
+            st.success("✅ Modèle entraîné et sauvegardé !")
+            time.sleep(1)
+            st.rerun()
+        else:
+            st.info("👆 Cliquez sur le bouton **'(Ré)entraîner le modèle'** dans la barre latérale pour commencer !")
+
+    # ── CHARGEMENT MODÈLE ET DONNÉES (pour les onglets suivants) ──
     detector, scaler, needs_training = load_or_train_model()
 
     if needs_training:
-        st.info("⚠️ Aucun modèle trouvé. Cliquez sur **'(Ré)entraîner le modèle'** dans la barre latérale.")
+        for tab in [tab_detect, tab_overview, tab_stats, tab_model]:
+            with tab:
+                st.info("⚠️ Aucun modèle trouvé. Veuillez d'abord l'entraîner dans l'onglet '🔧 Entraîner le modèle'.")
         st.stop()
 
-    # ── DONNÉES SKAB ──
+    # Charger les données
     df = get_demo_data(n_files)
     data_scaled = scaler.transform(df[FEATURES].values)
-
-    # Recalcul du seuil avec le percentile choisi
     errors = detector.compute_reconstruction_errors(data_scaled)
     threshold = float(np.percentile(errors, percentile))
     is_anomaly = errors > threshold
 
-    # ── KPIs ──
+    # ── KPIs (pour les onglets) ──
     n_anomalies = int(is_anomaly.sum())
     anomaly_rate = float(is_anomaly.mean() * 100)
     max_error = float(errors.max())
     mean_error = float(errors.mean())
-
     status = "🔴 CRITIQUE" if anomaly_rate > 8 else ("🟡 ATTENTION" if anomaly_rate > 3 else "🟢 NORMAL")
     status_class = "alert-critical" if anomaly_rate > 8 else ("alert-warning" if anomaly_rate > 3 else "alert-normal")
 
-    st.markdown(f"""
-    <div class="alert-box {status_class}">
-        {status} — {n_anomalies} anomalies détectées ({anomaly_rate:.1f}% du signal)
-    </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("🔴 Anomalies", f"{n_anomalies}", f"{anomaly_rate:.1f}%")
-    with col2:
-        st.metric("📉 Erreur moyenne", f"{mean_error:.4f}")
-    with col3:
-        st.metric("📈 Erreur max", f"{max_error:.4f}")
-    with col4:
-        st.metric("📏 Seuil", f"{threshold:.4f}")
-
-    st.divider()
-
-    # ── ONGLETS ──
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📡 Capteur & Anomalies", "🔬 Vue d'ensemble", "📊 Distribution", "🧠 Modèle"
-    ])
-
-    with tab1:
+    # ── ONGLET 3: DÉTECTION ──
+    with tab_detect:
+        st.markdown(f"""
+        <div class="alert-box {status_class}" style="margin-bottom:20px">
+            {status} — {n_anomalies} anomalies détectées ({anomaly_rate:.1f}% du signal)
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("🔴 Anomalies", f"{n_anomalies}", f"{anomaly_rate:.1f}%")
+        with col2:
+            st.metric("📉 Erreur moyenne", f"{mean_error:.4f}")
+        with col3:
+            st.metric("📈 Erreur max", f"{max_error:.4f}")
+        with col4:
+            st.metric("📏 Seuil", f"{threshold:.4f}")
+        
+        st.divider()
         st.plotly_chart(
             plot_sensor_data(df, errors, threshold, selected_feature),
             use_container_width=True
         )
         # Table des anomalies
         seq_len_used = detector.sequence_length
-        n_err = len(errors)
         anom_indices = np.where(is_anomaly)[0]
         if len(anom_indices) > 0:
             st.markdown(f"#### ⚠️ {len(anom_indices)} anomalies détectées")
@@ -375,13 +406,15 @@ def main():
                     })
             st.dataframe(pd.DataFrame(anom_data), use_container_width=True)
         else:
-            st.success("✅ Aucune anomalie détectée sur cette fenêtre.")
+            st.success("✅ Aucune anomalie détectée !")
 
-    with tab2:
-        st.markdown("#### 📊 Vue d'ensemble des 4 capteurs")
+    # ── ONGLET 4: VUE D'ENSEMBLE ──
+    with tab_overview:
+        st.markdown("#### 📊 Vue d'ensemble des 8 capteurs")
         st.plotly_chart(plot_all_sensors(df), use_container_width=True)
 
-    with tab3:
+    # ── ONGLET 5: STATISTIQUES ──
+    with tab_stats:
         st.markdown("#### 📈 Distribution des erreurs de reconstruction")
         st.plotly_chart(plot_error_distribution(errors, threshold), use_container_width=True)
         col_a, col_b = st.columns(2)
@@ -403,8 +436,9 @@ def main():
             - Seuil utilisé : `{threshold:.6f}` (P{percentile})
             """)
 
-    with tab4:
-        st.markdown("#### 🧠 Architecture du modèle")
+    # ── ONGLET 6: COMMENT ÇA MARCHE ──
+    with tab_model:
+        st.markdown("#### 🧠 Comment ça marche ?")
         col_m1, col_m2 = st.columns(2)
         with col_m1:
             st.markdown(f"""
@@ -416,7 +450,6 @@ def main():
             - Layers : `{detector.model.num_layers}`
             - Device : `{detector.device}`
             """)
-            # Compter les paramètres
             total_params = sum(p.numel() for p in detector.model.parameters())
             trainable = sum(p.numel() for p in detector.model.parameters() if p.requires_grad)
             st.markdown(f"""
@@ -428,17 +461,16 @@ def main():
             st.markdown("""
             **Principe de fonctionnement :**
             
-            1. **Entraînement** sur données normales uniquement
-            2. **Encodage** : LSTM compresse la séquence en vecteur latent
-            3. **Décodage** : reconstruction de la séquence originale
-            4. **Erreur MSE** : mesure la différence reconstruction / original
-            5. **Seuil** : percentile 95 des erreurs sur données normales
-            6. Si erreur > seuil → **ANOMALIE**
+            1. **Entraînement** : on donne seulement des données **normales** au modèle
+            2. **Encodage** : LSTM compresse la séquence de capteurs en un petit vecteur latent
+            3. **Décodage** : le modèle essaie de reconstruire la séquence originale
+            4. **Erreur MSE** : on mesure la différence entre la reconstruction et l'original
+            5. **Seuil** : on fixe un seuil (percentile 95 des erreurs sur données normales)
+            6. **Détection** : si l'erreur dépasse le seuil → **ANOMALIE !**
             
-            *Le modèle ne voit jamais les anomalies pendant l'entraînement.*
+            *Le modèle ne voit jamais les anomalies pendant l'entraînement : il apprend seulement ce qui est "normal" !*
             """)
 
-        # Bouton de téléchargement du modèle
         model_path = os.path.join(MODEL_DIR, 'autoencoder.pt')
         if os.path.exists(model_path):
             with open(model_path, 'rb') as f:
