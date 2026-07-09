@@ -30,7 +30,113 @@ MODEL_DIR = 'saved_model'
 # ── CSS ──────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-[data-testid="stMetricValue"] { font-size: 2rem; font-weight: 900; }
+/* Main container */
+.main .block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+/* Header styling */
+h1 {
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h2 {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+h3 {
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+}
+
+/* Metric styling */
+[data-testid="stMetricValue"] {
+    font-size: 1.75rem !important;
+    font-weight: 800 !important;
+}
+
+[data-testid="stMetricDelta"] {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+}
+
+/* Section header */
+.section-header {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: #6b7280 !important;
+    margin: 2rem 0 0.75rem 0 !important;
+    padding-bottom: 0.5rem !important;
+    border-bottom: 2px solid #e5e7eb !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .section-header {
+        color: #9ca3af !important;
+        border-bottom-color: #374151 !important;
+    }
+}
+
+/* Info box */
+.info-box {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #1f2937;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.info-box h3, .info-box h4 {
+    color: #1f2937;
+}
+
+.info-box p, .info-box li {
+    color: inherit;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    .info-box {
+        background-color: #1e293b;
+        border-color: #334151;
+        color: #f8fafc;
+    }
+
+    .info-box h3, .info-box h4 {
+        color: #e0e7ff;
+    }
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+}
+
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+    color: #f8fafc;
+}
+
+[data-testid="stSidebar"] h2 {
+    color: #e0e7ff !important;
+}
+
+[data-testid="stSidebar"] h3 {
+    color: #c7d2fe !important;
+}
+
+/* Alert boxes */
 .alert-box {
     padding: 12px 20px; border-radius: 8px; margin: 8px 0;
     font-weight: 600; font-size: 0.95rem;
@@ -38,6 +144,50 @@ st.markdown("""
 .alert-critical { background: rgba(255,59,59,0.15); border-left: 4px solid #ff3b3b; color: #ff3b3b; }
 .alert-warning  { background: rgba(255,165,0,0.15);  border-left: 4px solid #ffa500; color: #ffa500; }
 .alert-normal   { background: rgba(0,200,100,0.15);  border-left: 4px solid #00c864; color: #00c864; }
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    height: 50px;
+    padding: 0 1.5rem;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+}
+
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+}
+
+/* Buttons */
+.stButton > button {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* DataFrames */
+[data-testid="stDataFrame"] {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Divider */
+hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+    margin: 2rem 0;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -241,18 +391,14 @@ def plot_error_distribution(errors: np.ndarray, threshold: float):
     return fig
 
 
-# ── MAIN ─────────────────────────────────────────────────────────────────────
+# ── MAIN ──────────────────────────────────────────────────────────────────────
 
 def main():
     # Header
     st.markdown("""
-    <h1 style='font-size:2.2rem;font-weight:900;margin-bottom:0'>
-        Industrial Anomaly Detection
-    </h1>
-    <p style='color:#888;font-size:1rem;margin-top:4px'>
-        Détection d'anomalies sur capteurs industriels — Autoencoder LSTM PyTorch
-    </p>
-    """, unsafe_allow_html=True)
+    # Industrial Anomaly Detection
+    ## Détection d'anomalies sur capteurs industriels — Autoencoder LSTM PyTorch
+    """)
     st.divider()
 
     # ── ONGLETS PRINCIPAUX (nouvel ordre !) ──
@@ -300,34 +446,40 @@ def main():
 
     # ── ONGLET 1: BIENVENUE ──
     with tab_welcome:
+        st.markdown('<div class="section-header">Bienvenue</div>', unsafe_allow_html=True)
         st.markdown("""
-        ## Bienvenue
+        <div class="info-box">
+            <h3>Présentation du projet</h3>
+            <p style="margin: 0.5rem 0;">Cette application permet de détecter automatiquement les anomalies sur une machine industrielle (pompe hydraulique) en analysant les données de ses capteurs.</p>
+            <h4 style="margin: 1rem 0 0.5rem 0;">Pourquoi ça importe ?</h4>
+            <p style="margin: 0.5rem 0;">En industrie, détecter les défauts tôt permet :</p>
+            <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                <li>D'éviter des pannes coûteuses</li>
+                <li>De planifier la maintenance (maintenance prédictive)</li>
+                <li>D'assurer la sécurité des opérateurs</li>
+            </ul>
+            <h4 style="margin: 1rem 0 0.5rem 0;">Étapes pour utiliser l'app :</h4>
+            <ol style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                <li>Entraîner le modèle (onglet "Entraîner le modèle")</li>
+                <li>Détecter des anomalies (onglet "Détecter des anomalies")</li>
+                <li>Explorer les résultats</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
         
-        Cette application permet de détecter automatiquement les anomalies sur une machine industrielle (pompe hydraulique) en analysant les données de ses capteurs.
-        
-        ### Pourquoi ça importe ?
-        En industrie, détecter les défauts tôt permet :
-        - D'éviter des pannes coûteuses
-        - De planifier la maintenance (maintenance prédictive)
-        - D'assurer la sécurité des opérateurs
-        
-        ### Étapes pour utiliser l'app :
-        1. Entraîner le modèle (onglet "Entraîner le modèle")
-        2. Détecter des anomalies (onglet "Détecter des anomalies")
-        3. Explorer les résultats
-        
-        ### Les capteurs utilisés :
-        """)
+        st.markdown('<div class="section-header">Capteurs utilisés</div>', unsafe_allow_html=True)
         for feat, label in FEATURE_LABELS.items():
             st.markdown(f"- **{label}** ({feat})")
 
     # ── ONGLET 2: ENTRAÎNEMENT ──
     with tab_train:
+        st.markdown('<div class="section-header">Entraîner le modèle</div>', unsafe_allow_html=True)
         st.markdown("""
-        ## Entraîner le modèle
-        
-        Le modèle est un Autoencoder LSTM : il apprend à reconstruire les données normales de la machine.
-        """)
+        <div class="info-box">
+            <h3>Comment fonctionne l'entraînement ?</h3>
+            <p style="margin: 0.5rem 0;">Le modèle est un Autoencoder LSTM : il apprend à reconstruire les données normales de la machine.</p>
+        </div>
+        """, unsafe_allow_html=True)
         
         if train_btn:
             st.markdown("### Entraînement en cours...")
@@ -337,7 +489,7 @@ def main():
             time.sleep(1)
             st.rerun()
         else:
-            st.info("Cliquez sur le bouton '(Ré)entraîner le modèle' dans la barre latérale pour commencer.")
+            st.info("Cliquez sur le bouton \"(Ré)entraîner le modèle\" dans la barre latérale pour commencer.")
 
     # ── CHARGEMENT MODÈLE ET DONNÉES (pour les onglets suivants) ──
     detector, scaler, needs_training = load_or_train_model()
@@ -371,6 +523,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
+        st.markdown('<div class="section-header">KPIs</div>', unsafe_allow_html=True)
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric("Anomalies", f"{n_anomalies}", f"{anomaly_rate:.1f}%")
@@ -382,6 +535,7 @@ def main():
             st.metric("Seuil", f"{threshold:.4f}")
         
         st.divider()
+        st.markdown('<div class="section-header">Visualisation</div>', unsafe_allow_html=True)
         st.plotly_chart(
             plot_sensor_data(df, errors, threshold, selected_feature),
             use_container_width=True
@@ -390,7 +544,7 @@ def main():
         seq_len_used = detector.sequence_length
         anom_indices = np.where(is_anomaly)[0]
         if len(anom_indices) > 0:
-            st.markdown(f"#### {len(anom_indices)} anomalies détectées")
+            st.markdown('<div class="section-header">Anomalies détectées</div>', unsafe_allow_html=True)
             anom_data = []
             for idx in anom_indices[:20]:
                 real_idx = idx + seq_len_used - 1
@@ -409,39 +563,57 @@ def main():
 
     # ── ONGLET 4: VUE D'ENSEMBLE ──
     with tab_overview:
-        st.markdown("#### Vue d'ensemble des 8 capteurs")
+        st.markdown('<div class="section-header">Vue d\'ensemble</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="info-box">
+            <p style="margin: 0;">Visualisation de tous les capteurs en même temps pour avoir une vue d'ensemble de l'état de la machine.</p>
+        </div>
+        """, unsafe_allow_html=True)
         st.plotly_chart(plot_all_sensors(df), use_container_width=True)
 
     # ── ONGLET 5: STATISTIQUES ──
     with tab_stats:
-        st.markdown("#### Distribution des erreurs de reconstruction")
+        st.markdown('<div class="section-header">Distribution des erreurs</div>', unsafe_allow_html=True)
         st.plotly_chart(plot_error_distribution(errors, threshold), use_container_width=True)
+        
+        st.markdown('<div class="section-header">Statistiques détaillées</div>', unsafe_allow_html=True)
         col_a, col_b = st.columns(2)
         with col_a:
+            st.markdown("""
+            <div class="info-box">
+                <h4>Statistiques des erreurs</h4>
+            """, unsafe_allow_html=True)
             st.markdown(f"""
-            **Statistiques des erreurs :**
             - Min : `{errors.min():.6f}`
             - Max : `{errors.max():.6f}`
             - Moyenne : `{errors.mean():.6f}`
             - Std : `{errors.std():.6f}`
             - P95 (seuil) : `{np.percentile(errors, 95):.6f}`
             """)
+            st.markdown("</div>", unsafe_allow_html=True)
         with col_b:
+            st.markdown("""
+            <div class="info-box">
+                <h4>Résultats de détection</h4>
+            """, unsafe_allow_html=True)
             st.markdown(f"""
-            **Résultats détection :**
             - Total séquences : `{len(errors)}`
             - Anomalies : `{n_anomalies}` (`{anomaly_rate:.1f}%`)
             - Normales : `{len(errors) - n_anomalies}` (`{100-anomaly_rate:.1f}%`)
             - Seuil utilisé : `{threshold:.6f}` (P{percentile})
             """)
+            st.markdown("</div>", unsafe_allow_html=True)
 
     # ── ONGLET 6: COMMENT ÇA MARCHE ──
     with tab_model:
-        st.markdown("#### Comment ça marche ?")
+        st.markdown('<div class="section-header">Architecture du modèle</div>', unsafe_allow_html=True)
         col_m1, col_m2 = st.columns(2)
         with col_m1:
+            st.markdown("""
+            <div class="info-box">
+                <h4>Caractéristiques de l'Autoencoder LSTM</h4>
+            """, unsafe_allow_html=True)
             st.markdown(f"""
-            **Autoencoder LSTM :**
             - Input size : `{len(FEATURES)} capteurs`
             - Séquence : `{detector.sequence_length} pas de temps`
             - Hidden size : `{detector.model.hidden_size}`
@@ -456,19 +628,22 @@ def main():
             - Total : `{total_params:,}`
             - Entraînables : `{trainable:,}`
             """)
+            st.markdown("</div>", unsafe_allow_html=True)
         with col_m2:
             st.markdown("""
-            **Principe de fonctionnement :**
-            
-            1. Entraînement : on donne seulement des données normales au modèle
-            2. Encodage : LSTM compresse la séquence de capteurs en un petit vecteur latent
-            3. Décodage : le modèle essaie de reconstruire la séquence originale
-            4. Erreur MSE : on mesure la différence entre la reconstruction et l'original
-            5. Seuil : on fixe un seuil (percentile 95 des erreurs sur données normales)
-            6. Détection : si l'erreur dépasse le seuil, on détecte une anomalie
-            
-            Le modèle ne voit jamais les anomalies pendant l'entraînement : il apprend seulement ce qui est "normal".
-            """)
+            <div class="info-box">
+                <h4>Principe de fonctionnement</h4>
+                <ol style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                    <li>Entraînement : on donne seulement des données normales au modèle</li>
+                    <li>Encodage : LSTM compresse la séquence de capteurs en un petit vecteur latent</li>
+                    <li>Décodage : le modèle essaie de reconstruire la séquence originale</li>
+                    <li>Erreur MSE : on mesure la différence entre la reconstruction et l'original</li>
+                    <li>Seuil : on fixe un seuil (percentile 95 des erreurs sur données normales)</li>
+                    <li>Détection : si l'erreur dépasse le seuil, on détecte une anomalie</li>
+                </ol>
+                <p style="margin: 0.5rem 0; font-size: 0.9rem;">Le modèle ne voit jamais les anomalies pendant l'entraînement : il apprend seulement ce qui est "normal".</p>
+            </div>
+            """, unsafe_allow_html=True)
 
         model_path = os.path.join(MODEL_DIR, 'autoencoder.pt')
         if os.path.exists(model_path):
