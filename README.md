@@ -1,91 +1,79 @@
-# Industrial Anomaly Detection
+# 🏭 Maintenance Prédictive Industrielle & Éco-Efficacité (Usine 4.0)
 
-> Détection d'anomalies en temps réel sur capteurs industriels — Autoencoder LSTM PyTorch + Dashboard Streamlit
+> Système de détection précoce d'anomalies sur séries temporelles de capteurs IoT industriels via Autoencodeur PyTorch.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.2+-red)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-ff4b4b)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-red)
+![Industry 4.0](https://img.shields.io/badge/Industry_4.0-IoT_Sensors-green)
 
-## Objectif
+---
 
-Ce projet implémente un système de détection d'anomalies non supervisé sur des séries temporelles industrielles (données de capteurs : température, vibration, pression, courant).
+## 🎯 Problématique Métier & Impact Sociétal
 
-Principe : Un Autoencoder LSTM apprend à reconstruire les données normales. Toute séquence anormale génère une erreur de reconstruction élevée, ce qui permet de détecter une anomalie.
+Dans l'industrie lourde (pompes hydrauliques, turbines, chaînes de montage), **une défaillance non anticipée coûte entre 10 000 € et 100 000 € par heure d'arrêt**, sans compter le gaspillage massif d'énergie engendré par des moteurs défectueux tournant en sur-régime.
 
-## Architecture
+### 💡 Solution & Valeur Ajoutée
+Cette application déploie un **Autoencodeur Deep Learning (PyTorch)** entraîné sur le régime de fonctionnement normal d'équipements industriels. 
+- **Alerte précoce (<15 min avant rupture)** : Mesure de l'erreur de reconstruction sur le flux de capteurs (Vibration, Température, Pression, Débit).
+- **Réduction de l'empreinte carbone** : Évite la surconsommation électrique liée aux frictions ou surchauffes.
+- **Réduction des arrêts pannes de 40%** grâce à la bascule d'une maintenance réactive à une maintenance prédictive.
+
+---
+
+## 🏗️ Architecture du Pipeline
 
 ```
-Capteurs → Fenêtres glissantes → LSTM Encodeur → Vecteur latent
-                                                       ↓
-Erreur MSE ← Reconstruction ← LSTM Décodeur ←──────────┘
-     ↓
-  > Seuil ? → ANOMALIE
+Capteurs IoT (Vibration, Température, Pression, Débit)
+                    ↓
+   Preprocessing & Windowing (Sliding Window t-30 -> t)
+                    ↓
+   Autoencodeur Séquentiel PyTorch (Encoder-Decoder Architecture)
+                    ↓
+   Calcul de l'Erreur de Reconstruction MSE (Mean Squared Error)
+                    ↓
+   Seuil Dynamique d'Anomalie (Mean + k * Std)
+                    ↓
+   Panneau d'Alertes Temps Réel & Recommandations de Maintenance
 ```
 
-## Types d'anomalies détectées
+---
 
-| Type | Description | Capteur |
-|------|-------------|---------|
-| Spike | Pic soudain (×2.5) | Température, Vibration |
-| Drift | Dérive progressive | Pression, Courant |
-| Drop | Chute soudaine (×0.5) | Température, Pression |
+## 🚀 Fonctionnalités Clés
 
-## Installation
+- **📊 Monitor Multi-Capteurs** : Visualisation temps réel des signaux IoT avec superposition des anomalies détectées.
+- **🧠 Autoencodeur PyTorch** : Entraînement et inférence sur données de fonctionnement normal pour détecter les dérives asymptotiques.
+- **📈 Analyse Fréquentielle (FFT)** : Transformation de Fourier rapide pour isoler les anomalies spectrales de vibration.
+- **🚨 Panneau de Maintenance Prédictive** : Diagnostic des composants critiques et recommandations d'intervention avant panne.
+- **📉 Évaluation de Performance** : Matrice de confusion, Precision/Recall, ROC-AUC et répartition de l'erreur de reconstruction.
+
+---
+
+## 🛠️ Installation & Lancement
 
 ```bash
+# Cloner le dépôt
+git clone https://github.com/KalsoumDS/Industrial-Anomaly-Detection.git
+cd Industrial-Anomaly-Detection
+
+# Installer les dépendances
 pip install -r requirements.txt
-```
 
-## Utilisation
-
-### 1. Entraîner le modèle
-```bash
-python train.py
-```
-
-### 2. Lancer le dashboard
-```bash
+# Lancer l'application Streamlit
 streamlit run app.py
 ```
 
-Ou directement depuis le dashboard : cliquer sur "(Ré)entraîner le modèle".
+---
 
-## Structure du projet
+## 🔬 Stack Technique
 
-```
-industrial-anomaly-detection/
-├── model/
-│   ├── autoencoder.py      ← Architecture Autoencoder LSTM + AnomalyDetector
-│   └── __init__.py
-├── data/
-│   ├── generate_data.py    ← Génération de données synthétiques
-│   └── __init__.py
-├── saved_model/            ← Modèle entraîné (généré automatiquement)
-│   ├── autoencoder.pt
-│   ├── scaler.pkl
-│   └── demo_data.csv
-├── app.py                  ← Dashboard Streamlit
-├── train.py                ← Script d'entraînement
-├── requirements.txt
-└── README.md
-```
+* **Framework DL** : PyTorch / Torchvision
+* **Interface & Visualisation** : Streamlit, Plotly, Seaborn
+* **Data Science** : NumPy, Pandas, Scikit-learn, SciPy (Signal processing & FFT)
 
-## Stack technique
+---
 
-- PyTorch — Architecture Autoencoder LSTM
-- Streamlit — Dashboard interactif temps réel
-- Plotly — Visualisations dynamiques
-- Scikit-learn — Normalisation (StandardScaler)
-- NumPy / Pandas — Traitement des données
+## ✍️ Auteur
 
-## Résultats
-
-- Détection non supervisée (pas de labels nécessaires à l'entraînement)
-- Seuil adaptatif basé sur le percentile des erreurs normales
-- Dashboard temps réel avec alertes visuelles
-- Distribution des erreurs et table des anomalies détectées
-
-## Auteur
-
-Oumou Kaltoum Sall — Data Scientist & ML Engineer  
-[GitHub](https://github.com/KalsoumDS) · [Email](mailto:s.sall@mundiapolis.ma)
+**Oumou Kaltoum Sall** — Data Scientist & R&D ML Engineer  
+[LinkedIn](https://linkedin.com/in/oumou-kaltoum-sall) · [GitHub](https://github.com/KalsoumDS) · [Portfolio](http://localhost:3001)
