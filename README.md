@@ -1,79 +1,71 @@
-# 🏭 Maintenance Prédictive Industrielle & Éco-Efficacité (Usine 4.0)
+# Industrial Predictive Maintenance — IoT Anomaly Detection
 
-> Système de détection précoce d'anomalies sur séries temporelles de capteurs IoT industriels via Autoencodeur PyTorch.
+> Early anomaly detection on industrial IoT sensor time-series using a PyTorch Autoencoder, achieving pre-failure alerts under 15 minutes.
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-red)
-![Industry 4.0](https://img.shields.io/badge/Industry_4.0-IoT_Sensors-green)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c)](https://pytorch.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-red)](https://streamlit.io)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://industrial-anomaly-detection-3kvbtzwtmiwm7l74tsntcr.streamlit.app/)
 
----
-
-## 🎯 Problématique Métier & Impact Sociétal
-
-Dans l'industrie lourde (pompes hydrauliques, turbines, chaînes de montage), **une défaillance non anticipée coûte entre 10 000 € et 100 000 € par heure d'arrêt**, sans compter le gaspillage massif d'énergie engendré par des moteurs défectueux tournant en sur-régime.
-
-### 💡 Solution & Valeur Ajoutée
-Cette application déploie un **Autoencodeur Deep Learning (PyTorch)** entraîné sur le régime de fonctionnement normal d'équipements industriels. 
-- **Alerte précoce (<15 min avant rupture)** : Mesure de l'erreur de reconstruction sur le flux de capteurs (Vibration, Température, Pression, Débit).
-- **Réduction de l'empreinte carbone** : Évite la surconsommation électrique liée aux frictions ou surchauffes.
-- **Réduction des arrêts pannes de 40%** grâce à la bascule d'une maintenance réactive à une maintenance prédictive.
+**Live application:** https://industrial-anomaly-detection-3kvbtzwtmiwm7l74tsntcr.streamlit.app/
 
 ---
 
-## 🏗️ Architecture du Pipeline
+## Overview
+
+In heavy industry (hydraulic pumps, turbines, assembly lines), an unplanned failure costs between 10,000 and 100,000 EUR per hour of downtime. This application deploys a PyTorch Autoencoder trained on the normal operating regime of industrial equipment, enabling early anomaly detection before failure occurs.
+
+---
+
+## Architecture
 
 ```
-Capteurs IoT (Vibration, Température, Pression, Débit)
-                    ↓
-   Preprocessing & Windowing (Sliding Window t-30 -> t)
-                    ↓
-   Autoencodeur Séquentiel PyTorch (Encoder-Decoder Architecture)
-                    ↓
-   Calcul de l'Erreur de Reconstruction MSE (Mean Squared Error)
-                    ↓
-   Seuil Dynamique d'Anomalie (Mean + k * Std)
-                    ↓
-   Panneau d'Alertes Temps Réel & Recommandations de Maintenance
+IoT Sensors (Vibration, Temperature, Pressure, Flow)
+    |
+Preprocessing & Sliding Window (t-30 -> t)
+    |
+Sequential Autoencoder (PyTorch Encoder-Decoder)
+    |
+Reconstruction Error (MSE per window)
+    |
+Dynamic Thresholding (percentile-based alert)
+    |
+Streamlit Dashboard — real-time anomaly visualization
 ```
 
 ---
 
-## 🚀 Fonctionnalités Clés
+## Key Results
 
-- **📊 Monitor Multi-Capteurs** : Visualisation temps réel des signaux IoT avec superposition des anomalies détectées.
-- **🧠 Autoencodeur PyTorch** : Entraînement et inférence sur données de fonctionnement normal pour détecter les dérives asymptotiques.
-- **📈 Analyse Fréquentielle (FFT)** : Transformation de Fourier rapide pour isoler les anomalies spectrales de vibration.
-- **🚨 Panneau de Maintenance Prédictive** : Diagnostic des composants critiques et recommandations d'intervention avant panne.
-- **📉 Évaluation de Performance** : Matrice de confusion, Precision/Recall, ROC-AUC et répartition de l'erreur de reconstruction.
+- Pre-failure alert: under 15 minutes before breakdown
+- Estimated reduction in unplanned downtime: 40%
+- Sensor coverage: Vibration, Temperature, Pressure, Flow rate
+- Threshold strategy: dynamic percentile-based, calibrated on normal operating regime
 
 ---
 
-## 🛠️ Installation & Lancement
+## Installation
 
 ```bash
-# Cloner le dépôt
 git clone https://github.com/KalsoumDS/Industrial-Anomaly-Detection.git
 cd Industrial-Anomaly-Detection
-
-# Installer les dépendances
+python -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
-
-# Lancer l'application Streamlit
 streamlit run app.py
 ```
 
 ---
 
-## 🔬 Stack Technique
+## Technologies
 
-* **Framework DL** : PyTorch / Torchvision
-* **Interface & Visualisation** : Streamlit, Plotly, Seaborn
-* **Data Science** : NumPy, Pandas, Scikit-learn, SciPy (Signal processing & FFT)
+- Python 3.10+, PyTorch 2.0+
+- NumPy, pandas, scikit-learn
+- Streamlit, Plotly
 
 ---
 
-## ✍️ Auteur
+## Author
 
-**Oumou Kaltoum Sall** — Data Scientist & R&D ML Engineer  
-[LinkedIn](https://linkedin.com/in/oumou-kaltoum-sall) · [GitHub](https://github.com/KalsoumDS) · [Portfolio](http://localhost:3001)
+Oumou Kaltoum Sall — Data Scientist & ML Engineer  
+[Portfolio](https://luxury-sunshine-073627.netlify.app) · [LinkedIn](https://linkedin.com/in/oumou-kaltoum-sall)
