@@ -35,6 +35,15 @@ st.markdown("""
     padding: 15px;
     margin-bottom: 10px;
 }
+.alert-box-warning {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid #f59e0b;
+    border-left: 5px solid #f59e0b;
+    padding: 14px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    color: #fef3c7;
+}
 .alert-box-danger {
     background: #450a0a;
     border-left: 5px solid #ef4444;
@@ -160,6 +169,22 @@ st.sidebar.title("Industrial IoT Monitor")
 st.sidebar.caption("PyTorch Deep Autoencoder · Predictive Maintenance")
 st.sidebar.markdown("---")
 
+# Presets d'incidents
+st.sidebar.markdown("##### Scénarios Industriels (1 Clic)")
+sc1, sc2 = st.sidebar.columns(2)
+with sc1:
+    if st.sidebar.button("Usure Roulement", use_container_width=True):
+        st.session_state.scenario = "bearing"
+    if st.sidebar.button("Cavitation Pompe", use_container_width=True):
+        st.session_state.scenario = "cavitation"
+with sc2:
+    if st.sidebar.button("Colmatage Débit", use_container_width=True):
+        st.sidebar_scenario = "clogging"
+        st.session_state.scenario = "clogging"
+    if st.sidebar.button("Régime Nominal", use_container_width=True):
+        st.session_state.scenario = "nominal"
+
+st.sidebar.markdown("---")
 equipement_select = st.sidebar.selectbox(
     "Monitored Equipment",
     ["Hydraulic Pump P-104 (Line A)", "Compression Turbine T-201", "Primary Motor M-04"]
