@@ -16,7 +16,7 @@ from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_prec
 
 # Page configuration - clean title without emojis
 st.set_page_config(
-    page_title="Industry 4.0 | IoT Predictive Maintenance",
+    page_title="Industrie 4.0 | Maintenance prédictive",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -165,8 +165,8 @@ def train_and_run_autoencoder(df: pd.DataFrame, threshold_std: float = 2.5) -> T
 
 
 # Sidebar Configuration
-st.sidebar.title("Industrial IoT Monitor")
-st.sidebar.caption("PyTorch Deep Autoencoder · Predictive Maintenance")
+st.sidebar.title("Supervision industrielle IoT")
+st.sidebar.caption("Autoencodeur profond PyTorch · Maintenance prédictive")
 st.sidebar.markdown("---")
 
 # Presets d'incidents
@@ -186,37 +186,41 @@ with sc2:
 
 st.sidebar.markdown("---")
 equipement_select = st.sidebar.selectbox(
-    "Monitored Equipment",
-    ["Hydraulic Pump P-104 (Line A)", "Compression Turbine T-201", "Primary Motor M-04"]
+    "Équipement surveillé",
+    [
+        "Pompe hydraulique P-104 (ligne A)",
+        "Turbine de compression T-201",
+        "Moteur principal M-04",
+    ],
 )
 
 threshold_slider = st.sidebar.slider(
-    "Sensitivity Threshold (Std MSE)",
+    "Seuil de sensibilité (écart-type de l’erreur)",
     min_value=1.5, max_value=4.0, value=2.5, step=0.1,
-    help="Adjusts the autoencoder tolerance threshold for anomaly alerting."
+    help="Ajuste le seuil de tolérance de l’autoencodeur pour détecter les anomalies."
 )
 
 selected_view = st.sidebar.radio(
     "Navigation",
     [
-        "Real-Time Sensor Monitor",
-        "Autoencoder Reconstruction Error",
-        "Maintenance Diagnostics & Alerts",
-        "Model Performance Metrics"
-    ]
+        "Surveillance des capteurs en temps réel",
+        "Erreur de reconstruction de l’autoencodeur",
+        "Diagnostics et alertes de maintenance",
+        "Performances du modèle",
+    ],
 )
 
 st.sidebar.markdown("---")
 st.sidebar.info("""
-**Industrial & Environmental Impact:**
-- Pre-failure warning < 15 min prior to breakdown
-- Energy waste reduction through friction detection
-- 40% reduction in unplanned maintenance downtime
+**Impact industriel et environnemental :**
+- Alerte jusqu’à 15 min avant une défaillance
+- Réduction des pertes d’énergie par détection des frottements
+- Jusqu’à 40 % de réduction des arrêts de maintenance imprévus
 """)
 
 # Main Content
-st.title("Industrial Predictive Maintenance & Eco-Efficiency")
-st.caption(f"Real-time telemetry stream — **{equipement_select}**")
+st.title("Maintenance prédictive industrielle et éco-efficacité")
+st.caption(f"Télémétrie en temps réel — **{equipement_select}**")
 
 df_data = generate_industrial_sensor_data()
 mse_scores, threshold_val, pred_anomalies = train_and_run_autoencoder(df_data, threshold_std=threshold_slider)
@@ -228,68 +232,82 @@ c1, c2, c3, c4 = st.columns(4)
 total_anomalies = int(df_data['pred_anomaly'].sum())
 avg_vibe = df_data['vibration_mm_s'].mean()
 avg_temp = df_data['temperature_celsius'].mean()
-status_str = "CRITICAL ALERT" if total_anomalies > 0 else "NORMAL OPERATION"
+status_str = "ALERTE CRITIQUE" if total_anomalies > 0 else "FONCTIONNEMENT NORMAL"
 
-c1.metric("Equipment Status", status_str)
-c2.metric("Detected Anomalies", f"{total_anomalies} timestamps", delta=f"{total_anomalies/len(df_data)*100:.1f}% of stream")
-c3.metric("Average Vibration", f"{avg_vibe:.2f} mm/s")
-c4.metric("Average Temperature", f"{avg_temp:.1f} °C")
+c1.metric("État de l’équipement", status_str)
+c2.metric("Anomalies détectées", f"{total_anomalies} instants", delta=f"{total_anomalies/len(df_data)*100:.1f} % de la série")
+c3.metric("Vibration moyenne", f"{avg_vibe:.2f} mm/s")
+c4.metric("Température moyenne", f"{avg_temp:.1f} °C")
 
 st.markdown("---")
 
 # View 1: Real-Time Sensor Monitor
-if selected_view == "Real-Time Sensor Monitor":
-    st.subheader("Multi-Sensor Telemetry Stream")
-    st.write("IoT telemetry signals with red markers indicating autoencoder-flagged anomalies.")
+if selected_view == "Surveillance des capteurs en temps réel":
+    st.subheader("Télémétrie multicapteur")
+    st.write("Signaux IoT; les marqueurs rouges indiquent les anomalies détectées par l’autoencodeur.")
     
     fig = make_subplots(
         rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.05,
-        subplot_titles=("Vibration (mm/s)", "Temperature (C)", "Pressure (bar)", "Flow Rate (L/min)")
+        subplot_titles=("Vibrations (mm/s)", "Température (°C)", "Pression (bar)", "Débit (L/min)")
     )
     
-    fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['vibration_mm_s'], mode='lines', name='Vibration', line=dict(color='#38bdf8')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['temperature_celsius'], mode='lines', name='Temperature', line=dict(color='#f97316')), row=2, col=1)
-    fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['pressure_bar'], mode='lines', name='Pressure', line=dict(color='#a855f7')), row=3, col=1)
-    fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['flow_rate_l_min'], mode='lines', name='Flow Rate', line=dict(color='#10b981')), row=4, col=1)
+    fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['vibration_mm_s'], mode='lines', name='Vibrations', line=dict(color='#38bdf8')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['temperature_celsius'], mode='lines', name='Température', line=dict(color='#f97316')), row=2, col=1)
+    fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['pressure_bar'], mode='lines', name='Pression', line=dict(color='#a855f7')), row=3, col=1)
+    fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['flow_rate_l_min'], mode='lines', name='Débit', line=dict(color='#10b981')), row=4, col=1)
     
     anom_df = df_data[df_data['pred_anomaly'] == 1]
-    fig.add_trace(go.Scatter(x=anom_df['timestamp'], y=anom_df['vibration_mm_s'], mode='markers', name='Flagged Anomaly', marker=dict(color='#ef4444', size=6)), row=1, col=1)
+    fig.add_trace(go.Scatter(x=anom_df['timestamp'], y=anom_df['vibration_mm_s'], mode='markers', name='Anomalie détectée', marker=dict(color='#ef4444', size=6)), row=1, col=1)
 
     fig.update_layout(height=650, template="plotly_dark", showlegend=True, margin=dict(l=20, r=20, t=40, b=20))
     st.plotly_chart(fig, use_container_width=True)
 
 # View 2: Reconstruction Error
-elif selected_view == "Autoencoder Reconstruction Error":
-    st.subheader("Deep Learning Diagnostic (MSE Reconstruction Error)")
-    st.write("The PyTorch autoencoder models baseline healthy behavior. Sensor drifts cause reconstruction error to cross the adaptive threshold.")
+elif selected_view == "Erreur de reconstruction de l’autoencodeur":
+    st.subheader("Diagnostic par apprentissage profond (erreur de reconstruction)")
+    st.write("L’autoencodeur PyTorch apprend le comportement normal. Les dérives des capteurs font dépasser à l’erreur de reconstruction le seuil adaptatif.")
     
     col_chart, col_dist = st.columns([2, 1])
     
     with col_chart:
         fig_mse = go.Figure()
-        fig_mse.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['mse_loss'], mode='lines', name='MSE Error', line=dict(color='#6366f1', width=1.5)))
-        fig_mse.add_trace(go.Scatter(x=df_data['timestamp'], y=[threshold_val]*len(df_data), mode='lines', name='Adaptive Threshold', line=dict(color='#ef4444', dash='dash', width=2)))
-        fig_mse.update_layout(title="Temporal MSE Reconstruction Loss", template="plotly_dark", height=400)
+        fig_mse.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['mse_loss'], mode='lines', name='Erreur quadratique moyenne', line=dict(color='#6366f1', width=1.5)))
+        fig_mse.add_trace(go.Scatter(x=df_data['timestamp'], y=[threshold_val]*len(df_data), mode='lines', name='Seuil adaptatif', line=dict(color='#ef4444', dash='dash', width=2)))
+        fig_mse.update_layout(title="Évolution de l’erreur de reconstruction", template="plotly_dark", height=400)
         st.plotly_chart(fig_mse, use_container_width=True)
         
     with col_dist:
+        histogram_data = df_data.assign(
+            etat_detecte=df_data["pred_anomaly"].map({
+                0: "Fonctionnement normal",
+                1: "Anomalie détectée",
+            })
+        )
         fig_hist = px.histogram(
-            df_data, x="mse_loss", color="pred_anomaly",
-            color_discrete_map={0: '#10b981', 1: '#ef4444'},
-            title="Loss Distribution",
-            labels={'mse_loss': 'MSE Error', 'pred_anomaly': 'Anomaly'}
+            histogram_data,
+            x="mse_loss",
+            color="etat_detecte",
+            color_discrete_map={
+                "Fonctionnement normal": "#10b981",
+                "Anomalie détectée": "#ef4444",
+            },
+            title="Distribution des erreurs",
+            labels={
+                'mse_loss': 'Erreur quadratique moyenne',
+                'etat_detecte': 'État détecté',
+            },
         )
         fig_hist.update_layout(template="plotly_dark", height=400)
         st.plotly_chart(fig_hist, use_container_width=True)
 
     st.markdown("---")
-    st.subheader("Root Cause Sensor Decomposition (Analyse de Cause Racine)")
+    st.subheader("Identification du capteur à l’origine de l’anomalie")
     st.caption("Décomposition de l'erreur résiduelle par capteur pour identifier le composant en défaillance.")
 
     # Calculate average error contribution during anomalous windows vs normal
     anomaly_mask = df_data['pred_anomaly'] == 1
     sensor_names = {
-        'err_vibration_mm_s': 'Vibration (Palier/Roulement)',
+        'err_vibration_mm_s': 'Vibrations (palier/roulement)',
         'err_temperature_celsius': 'Température (Échauffement)',
         'err_pressure_bar': 'Pression (Circuit hydraulique)',
         'err_flow_rate_l_min': 'Débit (Colmatage pompe)'
@@ -326,40 +344,48 @@ elif selected_view == "Autoencoder Reconstruction Error":
     else:
         st.info("Aucune anomalie détectée avec le seuil actuel pour afficher la décomposition de cause racine.")
 
-# View 3: Maintenance Diagnostics & Alerts
-elif selected_view == "Maintenance Diagnostics & Alerts":
-    st.subheader("Preventive Intervention Recommendations")
-    st.write("Automated decision support for industrial maintenance operators.")
+# Vue 3 : diagnostics et alertes de maintenance
+elif selected_view == "Diagnostics et alertes de maintenance":
+    st.subheader("Recommandations d’intervention préventive")
+    st.write("Aide automatisée à la décision pour les équipes de maintenance industrielle.")
     
     if total_anomalies > 0:
         first_ts = df_data[df_data['pred_anomaly']==1]['timestamp'].iloc[0].strftime('%H:%M')
         last_ts = df_data[df_data['pred_anomaly']==1]['timestamp'].iloc[-1].strftime('%H:%M')
         st.markdown(f"""
         <div class="alert-box-danger">
-            <h4>CRITICAL ALERT: Bearing friction drift identified</h4>
-            <p>- <b>Impacted Window</b>: {first_ts} - {last_ts}</p>
-            <p>- <b>Diagnostic</b>: Joint increase in vibration (+120%) and temperature (+15 C). Risk of imminent seizure.</p>
-            <p>- <b>Recommended Action</b>: Prioritized axis lubrication and belt tension verification within 2 hours.</p>
+            <h4>ALERTE CRITIQUE : dérive de frottement du roulement détectée</h4>
+            <p><b>Période concernée :</b> {first_ts} – {last_ts}</p>
+            <p><b>Diagnostic :</b> hausse conjointe des vibrations (+120 %) et de la température (+15 °C). Risque de grippage imminent.</p>
+            <p><b>Action recommandée :</b> lubrifier l’axe en priorité et vérifier la tension de la courroie dans les 2 heures.</p>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown("""
         <div class="alert-box-success">
-            <h4>ALL SYSTEMS STABLE</h4>
-            <p>No anomalous patterns detected across the sensor suite. Next scheduled maintenance in 14 days.</p>
+            <h4>TOUS LES SYSTÈMES SONT STABLES</h4>
+            <p>Aucune anomalie détectée sur les capteurs. Prochaine maintenance planifiée dans 14 jours.</p>
         </div>
         """, unsafe_allow_html=True)
         
-    st.subheader("Recent Detections Log")
+    st.subheader("Journal des détections récentes")
     st.dataframe(
         df_data[df_data['pred_anomaly'] == 1][['timestamp', 'vibration_mm_s', 'temperature_celsius', 'pressure_bar', 'flow_rate_l_min', 'mse_loss']].tail(15),
-        use_container_width=True
+        use_container_width=True,
+        column_config={
+            "timestamp": st.column_config.DatetimeColumn("Horodatage"),
+            "vibration_mm_s": st.column_config.NumberColumn("Vibrations (mm/s)", format="%.2f"),
+            "temperature_celsius": st.column_config.NumberColumn("Température (°C)", format="%.1f"),
+            "pressure_bar": st.column_config.NumberColumn("Pression (bar)", format="%.2f"),
+            "flow_rate_l_min": st.column_config.NumberColumn("Débit (L/min)", format="%.1f"),
+            "mse_loss": st.column_config.NumberColumn("Erreur quadratique moyenne", format="%.4f"),
+        },
     )
 
-# View 4: Model Performance Metrics
-elif selected_view == "Model Performance Metrics":
-    st.subheader("Evaluation & Precision Metrics")
-    st.write("Benchmark of autoencoder predictions against labeled ground truth.")
+# Vue 4 : performances du modèle
+elif selected_view == "Performances du modèle":
+    st.subheader("Évaluation et métriques de précision")
+    st.write("Évaluation des prédictions de l’autoencodeur par rapport aux anomalies de référence.")
     
     tp = np.sum((df_data['is_anomaly'] == 1) & (df_data['pred_anomaly'] == 1))
     fp = np.sum((df_data['is_anomaly'] == 0) & (df_data['pred_anomaly'] == 1))
@@ -371,9 +397,9 @@ elif selected_view == "Model Performance Metrics":
     f1 = 2 * (precision * recall) / (precision + recall + 1e-8)
     
     m1, m2, m3 = st.columns(3)
-    m1.metric("Precision", f"{precision*100:.1f}%")
-    m2.metric("Recall", f"{recall*100:.1f}%")
-    m3.metric("F1-Score", f"{f1*100:.1f}%")
+    m1.metric("Précision", f"{precision*100:.1f} %")
+    m2.metric("Rappel", f"{recall*100:.1f} %")
+    m3.metric("Score F1", f"{f1*100:.1f} %")
     
     col_cm, col_info = st.columns(2)
     
@@ -381,9 +407,9 @@ elif selected_view == "Model Performance Metrics":
         cm_matrix = [[tn, fp], [fn, tp]]
         fig_cm = px.imshow(
             cm_matrix, text_auto=True,
-            labels=dict(x="Predicted", y="Ground Truth", color="Count"),
-            x=['Normal', 'Anomaly'], y=['Normal', 'Anomaly'],
-            title="Autoencoder Confusion Matrix",
+            labels=dict(x="Prédit", y="Réalité", color="Nombre"),
+            x=['Normal', 'Anomalie'], y=['Normal', 'Anomalie'],
+            title="Matrice de confusion de l’autoencodeur",
             color_continuous_scale="Blues"
         )
         fig_cm.update_layout(template="plotly_dark", height=380)
@@ -391,17 +417,17 @@ elif selected_view == "Model Performance Metrics":
         
     with col_info:
         st.markdown("""
-        ### Model Technical Specifications
-        - **Architecture**: Deep PyTorch Autoencoder (Linear + BatchNorm + LeakyReLU)
-        - **Input Vector**: 4-channel multivariate IoT telemetry (Vibration, Temperature, Pressure, Flow)
-        - **Latent Bottleneck**: 2-dimensional feature compression
-        - **Loss Function**: Mean Squared Error (MSE) reconstruction loss
-        - **Inference Mode**: Fully vectorized PyTorch execution
-        - **Operational Recall**: **97.0%** (anticipation jusqu'à 15 min avant rupture)
+        ### Caractéristiques techniques du modèle
+        - **Architecture** : autoencodeur profond PyTorch (Linear + BatchNorm + LeakyReLU)
+        - **Entrées** : télémétrie IoT à 4 variables (vibrations, température, pression, débit)
+        - **Espace latent** : compression des caractéristiques en 2 dimensions
+        - **Fonction de perte** : erreur quadratique moyenne de reconstruction
+        - **Inférence** : exécution PyTorch entièrement vectorisée
+        - **Rappel opérationnel** : **97,0 %** (anticipation jusqu’à 15 min avant une panne)
         """)
 
     st.markdown("---")
-    st.subheader("Performance Curves (SOTA Industrial Benchmark)")
+    st.subheader("Courbes de performance (référence industrielle)")
 
     # Compute ROC and PR curves on continuous MSE scores
     fpr, tpr, _ = roc_curve(df_data['is_anomaly'], df_data['mse_loss'])
@@ -413,13 +439,13 @@ elif selected_view == "Model Performance Metrics":
     col_roc, col_pr = st.columns(2)
     with col_roc:
         fig_roc = go.Figure()
-        fig_roc.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name=f'Autoencoder (AUC = {roc_auc_val:.3f})', line=dict(color='#6366f1', width=2.5)))
+        fig_roc.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name=f'Autoencodeur (AUC = {roc_auc_val:.3f})', line=dict(color='#6366f1', width=2.5)))
         fig_roc.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines', name='Hasard (AUC = 0.50)', line=dict(color='#94a3b8', dash='dash')))
-        fig_roc.update_layout(title="<b>ROC Curve (Receiver Operating Characteristic)</b>", xaxis_title="False Positive Rate", yaxis_title="True Positive Rate", template="plotly_dark", height=350)
+        fig_roc.update_layout(title="<b>Courbe ROC (caractéristique de fonctionnement)</b>", xaxis_title="Taux de faux positifs", yaxis_title="Taux de vrais positifs", template="plotly_dark", height=350)
         st.plotly_chart(fig_roc, use_container_width=True)
 
     with col_pr:
         fig_pr = go.Figure()
-        fig_pr.add_trace(go.Scatter(x=rec_curve, y=prec_curve, mode='lines', name=f'PR Curve (AUC = {pr_auc_val:.3f})', line=dict(color='#10b981', width=2.5)))
-        fig_pr.update_layout(title="<b>Precision-Recall Curve (PR-AUC)</b>", xaxis_title="Recall", yaxis_title="Precision", template="plotly_dark", height=350)
+        fig_pr.add_trace(go.Scatter(x=rec_curve, y=prec_curve, mode='lines', name=f'Courbe précision-rappel (AUC = {pr_auc_val:.3f})', line=dict(color='#10b981', width=2.5)))
+        fig_pr.update_layout(title="<b>Courbe précision-rappel (AUC-PR)</b>", xaxis_title="Rappel", yaxis_title="Précision", template="plotly_dark", height=350)
         st.plotly_chart(fig_pr, use_container_width=True)
