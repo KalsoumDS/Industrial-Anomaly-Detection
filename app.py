@@ -58,6 +58,63 @@ st.markdown("""
     border-radius: 6px;
     margin-bottom: 10px;
 }
+[data-testid="stAppViewContainer"] {
+    background:
+        radial-gradient(ellipse at 88% 0%, rgba(20, 83, 45, 0.24), transparent 38%),
+        #0b1110;
+}
+[data-testid="stSidebar"] {
+    background: #111a17;
+    border-right: 1px solid #293831;
+}
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: #d7f5dc;
+}
+h1 {
+    color: #e6f5e9;
+    letter-spacing: -.035em;
+}
+[data-testid="stMetric"] {
+    background: #121c18;
+    border: 1px solid #293831;
+    border-left: 3px solid #80c783;
+    border-radius: 6px;
+    padding: 1rem 1.1rem;
+}
+[data-testid="stMetricLabel"] {
+    color: #a8b9af;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .72rem;
+}
+.stRadio [role="radiogroup"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    padding: .65rem;
+    background: #111a17;
+    border: 1px solid #293831;
+    border-radius: 8px;
+}
+.stRadio [role="radiogroup"] label {
+    background: #18231e;
+    border: 1px solid #293831;
+    border-radius: 5px;
+    padding: .45rem .8rem;
+}
+.stRadio [role="radiogroup"] label:has(input:checked) {
+    background: #244c35;
+    border-color: #80c783;
+    color: #effff1;
+}
+[data-testid="stPlotlyChart"] {
+    border: 1px solid #293831;
+    border-radius: 8px;
+    padding: .4rem;
+    background: #0f1714;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -200,16 +257,6 @@ threshold_slider = st.sidebar.slider(
     help="Ajuste le seuil de tolérance de l’autoencodeur pour détecter les anomalies."
 )
 
-selected_view = st.sidebar.radio(
-    "Navigation",
-    [
-        "Surveillance des capteurs en temps réel",
-        "Erreur de reconstruction de l’autoencodeur",
-        "Diagnostics et alertes de maintenance",
-        "Performances du modèle",
-    ],
-)
-
 st.sidebar.markdown("---")
 st.sidebar.info("""
 **Impact industriel et environnemental :**
@@ -239,7 +286,17 @@ c2.metric("Anomalies détectées", f"{total_anomalies} instants", delta=f"{total
 c3.metric("Vibration moyenne", f"{avg_vibe:.2f} mm/s")
 c4.metric("Température moyenne", f"{avg_temp:.1f} °C")
 
-st.markdown("---")
+selected_view = st.radio(
+    "Vue de supervision",
+    [
+        "Surveillance des capteurs en temps réel",
+        "Erreur de reconstruction de l’autoencodeur",
+        "Diagnostics et alertes de maintenance",
+        "Performances du modèle",
+    ],
+    horizontal=True,
+    label_visibility="collapsed",
+)
 
 # View 1: Real-Time Sensor Monitor
 if selected_view == "Surveillance des capteurs en temps réel":
