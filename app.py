@@ -65,7 +65,7 @@ st.markdown("""
 # PyTorch Autoencoder Architecture
 class IoTAutoencoder(nn.Module):
     """Deep autoencoder for multivariate industrial sensor time-series reconstruction."""
-    
+
     def __init__(self, input_dim: int = 4, latent_dim: int = 2):
         super().__init__()
         self.encoder = nn.Sequential(
@@ -92,29 +92,29 @@ def generate_industrial_sensor_data(n_steps: int = 1200, random_state: int = 42)
     """Generate synthetic telemetry data with realistic sensor noise and injected faults."""
     np.random.seed(random_state)
     t = np.linspace(0, 100, n_steps)
-    
+
     vibration = 0.5 * np.sin(0.2 * t) + 0.1 * np.random.normal(size=n_steps) + 1.2
     temperature = 45.0 + 0.05 * t + 0.3 * np.random.normal(size=n_steps)
     pressure = 3.2 + 0.1 * np.cos(0.15 * t) + 0.05 * np.random.normal(size=n_steps)
     flow_rate = 120.0 - 0.02 * t + 0.8 * np.random.normal(size=n_steps)
-    
+
     anomalies = np.zeros(n_steps, dtype=int)
-    
+
     # Event 1: Bearing friction & overheating
     vibration[300:380] += np.linspace(0.8, 2.5, 80) + np.random.normal(0, 0.4, 80)
     temperature[320:400] += np.linspace(2, 18, 80)
     anomalies[300:400] = 1
-    
+
     # Event 2: Hydraulic Pressure Drop & Cavitation
     pressure[700:750] -= np.linspace(0.5, 1.8, 50)
     vibration[710:760] += 1.2 * np.random.normal(size=50)
     anomalies[700:760] = 1
-    
+
     # Event 3: Pump Impeller Clogging
     flow_rate[1000:1060] -= np.linspace(10, 45, 60)
     temperature[1020:1080] += np.linspace(1, 12, 60)
     anomalies[1000:1080] = 1
-    
+
     return pd.DataFrame({
         'timestamp': pd.date_range(start='2026-08-01 00:00', periods=n_steps, freq='1min'),
         'vibration_mm_s': vibration,
@@ -130,19 +130,19 @@ def train_and_run_autoencoder(df: pd.DataFrame, threshold_std: float = 2.5) -> T
     """Train PyTorch Autoencoder on normal baseline regime and compute MSE reconstruction loss."""
     features = ['vibration_mm_s', 'temperature_celsius', 'pressure_bar', 'flow_rate_l_min']
     X = df[features].values
-    
+
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
-    
+
     # Train only on normal baseline data
     normal_mask = df['is_anomaly'] == 0
     X_train = torch.tensor(X_scaled[normal_mask], dtype=torch.float32)
-    
+
     torch.manual_seed(42)
     model = IoTAutoencoder(input_dim=4, latent_dim=2)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-5)
     criterion = nn.MSELoss()
-    
+
     model.train()
     for _ in range(60):
         optimizer.zero_grad()
@@ -150,17 +150,17 @@ def train_and_run_autoencoder(df: pd.DataFrame, threshold_std: float = 2.5) -> T
         loss = criterion(output, X_train)
         loss.backward()
         optimizer.step()
-        
+
     model.eval()
     with torch.no_grad():
         X_all = torch.tensor(X_scaled, dtype=torch.float32)
         reconstructed = model(X_all)
         mse = torch.mean((X_all - reconstructed) ** 2, dim=1).numpy()
-        
+
     normal_mse = mse[normal_mask]
     threshold = float(np.mean(normal_mse) + threshold_std * np.std(normal_mse))
     predicted_anomalies = (mse > threshold).astype(int)
-    
+
     return mse, threshold, predicted_anomalies
 
 
@@ -245,17 +245,17 @@ st.markdown("---")
 if selected_view == "Surveillance des capteurs en temps réel":
     st.subheader("Télémétrie multicapteur")
     st.write("Signaux IoT; les marqueurs rouges indiquent les anomalies détectées par l’autoencodeur.")
-    
+
     fig = make_subplots(
         rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.05,
         subplot_titles=("Vibrations (mm/s)", "Température (°C)", "Pression (bar)", "Débit (L/min)")
     )
-    
+
     fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['vibration_mm_s'], mode='lines', name='Vibrations', line=dict(color='#38bdf8')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['temperature_celsius'], mode='lines', name='Température', line=dict(color='#f97316')), row=2, col=1)
     fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['pressure_bar'], mode='lines', name='Pression', line=dict(color='#a855f7')), row=3, col=1)
     fig.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['flow_rate_l_min'], mode='lines', name='Débit', line=dict(color='#10b981')), row=4, col=1)
-    
+
     anom_df = df_data[df_data['pred_anomaly'] == 1]
     fig.add_trace(go.Scatter(x=anom_df['timestamp'], y=anom_df['vibration_mm_s'], mode='markers', name='Anomalie détectée', marker=dict(color='#ef4444', size=6)), row=1, col=1)
 
@@ -266,16 +266,16 @@ if selected_view == "Surveillance des capteurs en temps réel":
 elif selected_view == "Erreur de reconstruction de l’autoencodeur":
     st.subheader("Diagnostic par apprentissage profond (erreur de reconstruction)")
     st.write("L’autoencodeur PyTorch apprend le comportement normal. Les dérives des capteurs font dépasser à l’erreur de reconstruction le seuil adaptatif.")
-    
+
     col_chart, col_dist = st.columns([2, 1])
-    
+
     with col_chart:
         fig_mse = go.Figure()
         fig_mse.add_trace(go.Scatter(x=df_data['timestamp'], y=df_data['mse_loss'], mode='lines', name='Erreur quadratique moyenne', line=dict(color='#6366f1', width=1.5)))
         fig_mse.add_trace(go.Scatter(x=df_data['timestamp'], y=[threshold_val]*len(df_data), mode='lines', name='Seuil adaptatif', line=dict(color='#ef4444', dash='dash', width=2)))
         fig_mse.update_layout(title="Évolution de l’erreur de reconstruction", template="plotly_dark", height=400)
         st.plotly_chart(fig_mse, use_container_width=True)
-        
+
     with col_dist:
         histogram_data = df_data.assign(
             etat_detecte=df_data["pred_anomaly"].map({
@@ -312,15 +312,15 @@ elif selected_view == "Erreur de reconstruction de l’autoencodeur":
         'err_pressure_bar': 'Pression (Circuit hydraulique)',
         'err_flow_rate_l_min': 'Débit (Colmatage pompe)'
     }
-    
+
     if anomaly_mask.sum() > 0:
         anom_errs = df_data.loc[anomaly_mask, list(sensor_names.keys())].mean()
         norm_errs = df_data.loc[~anomaly_mask, list(sensor_names.keys())].mean()
-        
+
         # Contribution relative
         rel_contrib = (anom_errs / (norm_errs + 1e-6)).sort_values(ascending=True)
         labels = [sensor_names[k] for k in rel_contrib.index]
-        
+
         fig_rc = go.Figure(go.Bar(
             x=rel_contrib.values,
             y=labels,
@@ -348,7 +348,7 @@ elif selected_view == "Erreur de reconstruction de l’autoencodeur":
 elif selected_view == "Diagnostics et alertes de maintenance":
     st.subheader("Recommandations d’intervention préventive")
     st.write("Aide automatisée à la décision pour les équipes de maintenance industrielle.")
-    
+
     if total_anomalies > 0:
         first_ts = df_data[df_data['pred_anomaly']==1]['timestamp'].iloc[0].strftime('%H:%M')
         last_ts = df_data[df_data['pred_anomaly']==1]['timestamp'].iloc[-1].strftime('%H:%M')
@@ -367,7 +367,7 @@ elif selected_view == "Diagnostics et alertes de maintenance":
             <p>Aucune anomalie détectée sur les capteurs. Prochaine maintenance planifiée dans 14 jours.</p>
         </div>
         """, unsafe_allow_html=True)
-        
+
     st.subheader("Journal des détections récentes")
     st.dataframe(
         df_data[df_data['pred_anomaly'] == 1][['timestamp', 'vibration_mm_s', 'temperature_celsius', 'pressure_bar', 'flow_rate_l_min', 'mse_loss']].tail(15),
@@ -386,23 +386,23 @@ elif selected_view == "Diagnostics et alertes de maintenance":
 elif selected_view == "Performances du modèle":
     st.subheader("Évaluation et métriques de précision")
     st.write("Évaluation des prédictions de l’autoencodeur par rapport aux anomalies de référence.")
-    
+
     tp = np.sum((df_data['is_anomaly'] == 1) & (df_data['pred_anomaly'] == 1))
     fp = np.sum((df_data['is_anomaly'] == 0) & (df_data['pred_anomaly'] == 1))
     fn = np.sum((df_data['is_anomaly'] == 1) & (df_data['pred_anomaly'] == 0))
     tn = np.sum((df_data['is_anomaly'] == 0) & (df_data['pred_anomaly'] == 0))
-    
+
     precision = tp / (tp + fp + 1e-8)
     recall = tp / (tp + fn + 1e-8)
     f1 = 2 * (precision * recall) / (precision + recall + 1e-8)
-    
+
     m1, m2, m3 = st.columns(3)
     m1.metric("Précision", f"{precision*100:.1f} %")
     m2.metric("Rappel", f"{recall*100:.1f} %")
     m3.metric("Score F1", f"{f1*100:.1f} %")
-    
+
     col_cm, col_info = st.columns(2)
-    
+
     with col_cm:
         cm_matrix = [[tn, fp], [fn, tp]]
         fig_cm = px.imshow(
@@ -414,7 +414,7 @@ elif selected_view == "Performances du modèle":
         )
         fig_cm.update_layout(template="plotly_dark", height=380)
         st.plotly_chart(fig_cm, use_container_width=True)
-        
+
     with col_info:
         st.markdown("""
         ### Caractéristiques techniques du modèle
